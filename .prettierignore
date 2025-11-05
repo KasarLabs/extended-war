@@ -1,0 +1,30 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+build
+*.js.map
+
+# Coverage
+coverage
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+
+# IDE
+.vscode
+.idea
+
+# Cache
+.cache
+.eslintcache
+
+# Package manager
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
