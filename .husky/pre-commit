@@ -1,0 +1,16 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Detect package manager
+if [ -f pnpm-lock.yaml ]; then
+  PKG_MANAGER="pnpm"
+elif [ -f package-lock.json ]; then
+  PKG_MANAGER="npm"
+elif [ -f yarn.lock ]; then
+  PKG_MANAGER="yarn"
+else
+  PKG_MANAGER="npm"
+fi
+
+$PKG_MANAGER run format:check
+$PKG_MANAGER run check-types

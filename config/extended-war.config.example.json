@@ -1,0 +1,43 @@
+{
+  "accounts": [
+    {
+      "name": "Agent 1",
+      "extended": {
+        "apiUrl": "https://api.starknet.extended.exchange",
+        "apiKey": "your_extended_api_key_here",
+        "privateKey": "0x_your_starknet_private_key_here"
+      },
+      "model": {
+        "provider": "anthropic",
+        "name": "claude-sonnet-4-20250514",
+        "apiKey": "sk-ant-api03-..."
+      }
+    },
+    {
+      "name": "Agent 2",
+      "extended": {
+        "apiUrl": "https://api.starknet.extended.exchange",
+        "apiKey": "your_second_extended_api_key_here",
+        "privateKey": "0x_your_second_starknet_private_key_here"
+      },
+      "model": {
+        "provider": "gemini",
+        "name": "gemini-2.5-flash",
+        "apiKey": "AIza..."
+      }
+    },
+    {
+      "name": "Agent 3 (OpenAI)",
+      "extended": {
+        "apiUrl": "https://api.starknet.extended.exchange",
+        "apiKey": "your_third_extended_api_key_here",
+        "privateKey": "0x_your_third_starknet_private_key_here"
+      },
+      "model": {
+        "provider": "openai",
+        "name": "gpt-4-turbo",
+        "apiKey": "sk-proj-..."
+      }
+    }
+  ]
+}
