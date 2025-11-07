@@ -1,0 +1,249 @@
+{
+  "info": {
+    "name": "Extended War API",
+    "description": "API endpoints for Extended War trading bot",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "extended-war"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5002",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Check if the service is running and healthy"
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Service is healthy\",\n  \"data\": {\n    \"status\": \"ok\",\n    \"uptime\": 123.456,\n    \"timestamp\": \"2025-11-07T14:30:00.000Z\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Start War",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{base_url}}/start-war",
+          "host": ["{{base_url}}"],
+          "path": ["start-war"]
+        },
+        "description": "Initialize and start the trading bot. The bot will run in the background."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/start-war",
+              "host": ["{{base_url}}"],
+              "path": ["start-war"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"message\": \"War started successfully\",\n  \"data\": {\n    \"status\": \"started\",\n    \"startedAt\": \"2025-11-07T14:30:00.000Z\"\n  }\n}"
+        },
+        {
+          "name": "Error",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/start-war",
+              "host": ["{{base_url}}"],
+              "path": ["start-war"]
+            }
+          },
+          "status": "Internal Server Error",
+          "code": 500,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Failed to start war\",\n  \"error\": {\n    \"code\": \"WAR_START_FAILED\",\n    \"message\": \"Connection timeout\",\n    \"details\": {}\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "End War",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{base_url}}/end-war",
+          "host": ["{{base_url}}"],
+          "path": ["end-war"]
+        },
+        "description": "Stop the trading bot execution"
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/end-war",
+              "host": ["{{base_url}}"],
+              "path": ["end-war"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"message\": \"War stopped successfully\",\n  \"data\": {\n    \"status\": \"stopped\",\n    \"stoppedAt\": \"2025-11-07T14:35:00.000Z\"\n  }\n}"
+        },
+        {
+          "name": "Error",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/end-war",
+              "host": ["{{base_url}}"],
+              "path": ["end-war"]
+            }
+          },
+          "status": "Internal Server Error",
+          "code": 500,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Failed to stop war\",\n  \"error\": {\n    \"code\": \"WAR_STOP_FAILED\",\n    \"message\": \"Unknown error\",\n    \"details\": {}\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Trade History",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/trade-history",
+          "host": ["{{base_url}}"],
+          "path": ["trade-history"]
+        },
+        "description": "Retrieve trading history for all configured accounts"
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/trade-history",
+              "host": ["{{base_url}}"],
+              "path": ["trade-history"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Trade history retrieved successfully\",\n  \"data\": {\n    \"accounts\": [\n      {\n        \"account\": {\n          \"name\": \"Account 1\",\n          \"model\": {},\n          \"extended\": {}\n        },\n        \"balance\": {},\n        \"openOrders\": [],\n        \"positions\": [],\n        \"trade\": []\n      }\n    ],\n    \"timestamp\": \"2025-11-07T14:30:00.000Z\"\n  }\n}"
+        },
+        {
+          "name": "Error",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/trade-history",
+              "host": ["{{base_url}}"],
+              "path": ["trade-history"]
+            }
+          },
+          "status": "Internal Server Error",
+          "code": 500,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Failed to retrieve trade history\",\n  \"error\": {\n    \"code\": \"TRADE_HISTORY_FAILED\",\n    \"message\": \"Database connection error\",\n    \"details\": {}\n  }\n}"
+        }
+      ]
+    }
+  ]
+}

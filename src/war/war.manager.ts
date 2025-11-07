@@ -1,47 +1,22 @@
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { randomUUID } from 'node:crypto';
 import { getBalance } from '../utils/extended/tools/read/getBalance';
-import type {
-  ExtendedApiEnv,
-  LeverageSetting,
-  OrderReturn,
-  Position,
-} from '../utils/extended/lib/types';
+import type { Balance, OrderReturn, Position, Trade } from '../utils/extended/lib/types';
 import { getPositions } from '../utils/extended/tools/read/getPositions';
 import { getOpenOrders } from '../utils/extended/tools/read/getOpenOrders';
-import { getMarkets } from '../utils/extended/tools/read/getMarkets';
-import { getCandlesHistory, type Candle } from '../utils/extended/tools/read/getCandlesHistory';
-import { formatTokensChartsContext, formatUserInformationContext } from '../utils/format.utils';
 import { WarGraph } from './war.graph';
 import type { CompiledStateGraph } from '@langchain/langgraph';
-import { v4 as uuidv4 } from 'uuid';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { loadConfig, type Config, type ConfigWithModel } from '../utils/config-loader';
-import type { MarketInformation } from '../utils/get-context';
 import { initializeModels } from '../utils/model.utils';
-import type { getTradesHistory } from '../utils/extended/tools/read/getTradesHistory';
-
-export const tokenSupported = ['BTC-USD', 'ETH-USD', 'EUR-USD'];
-
-export interface ContextsFormatted {
-  userContext: string;
-  tokensContext: string;
-}
-
-export interface ContextUserInformation {
-  balance: string;
-  positions: Position[];
-  order: OrderReturn[];
-}
-export interface ContextTokensCharts {
-  marketInformation: MarketInformation;
-  currentLeverage: LeverageSetting[];
-  candle_charts: Candle[];
-}
+import { getTradesHistory } from '../utils/extended/tools/read/getTradesHistory';
+import type { HistoryTradeAccount } from './war.types';
+export { tokenSupported } from './war.types';
 
 export class ExtendedWarManager {
   private static instance: ExtendedWarManager | null = null;
   private static initialized: boolean = false;
+  private running: boolean = false;
   private config: ConfigWithModel;
   private graph: CompiledStateGraph<any, any, any, any, any> | undefined;
   private warGraphInstance: WarGraph | undefined;
@@ -108,15 +83,21 @@ export class ExtendedWarManager {
       throw new Error('WarGraph is not initialized. Call init() first.');
     }
 
-    const thread_id = uuidv4();
+    if (this.signal.signal.aborted === true) {
+      this.signal = new AbortController();
+    }
+    const thread_id = randomUUID();
+    this.running = true;
     while (this.signal.signal.aborted === false) {
       await this.graph.invoke('', {
         configurable: { thread_id },
       });
 
       console.log('WarGraph execution cycle completed. Waiting for next cycle...');
-      await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait for 10 seconds before next cycle
+      const cycleTimeout = Number.parseInt(process.env.WAR_CYCLE_TIMEOUT_MS || '10000', 10);
+      await new Promise((resolve) => setTimeout(resolve, cycleTimeout));
     }
+    this.running = false;
     console.log('War execution completed.');
     return;
   }
@@ -126,10 +107,60 @@ export class ExtendedWarManager {
     console.log('War execution stopped.');
   }
 
-  public getTradesHistory() {
-    const tradeHistory = [];
+  public async getTradesHistory(): Promise<HistoryTradeAccount[]> {
+    const tradeHistory: HistoryTradeAccount[] = [];
     for (const account of this.config.accounts) {
+      const accountBalance = await getBalance(
+        {
+          apiUrl: account.extended.apiUrl as string,
+          apiKey: account.extended.apiKey as string,
+          privateKey: account.extended.privateKey as string,
+        },
+        {}
+      );
+      const openOrders = await getOpenOrders(
+        {
+          apiUrl: account.extended.apiUrl as string,
+          apiKey: account.extended.apiKey as string,
+          privateKey: account.extended.privateKey as string,
+        },
+        {}
+      );
+      const positions = await getPositions(
+        {
+          apiUrl: account.extended.apiUrl as string,
+          apiKey: account.extended.apiKey as string,
+          privateKey: account.extended.privateKey as string,
+        },
+        {}
+      );
+      const trade = await getTradesHistory(
+        {
+          apiUrl: account.extended.apiUrl as string,
+          apiKey: account.extended.apiKey as string,
+          privateKey: account.extended.privateKey as string,
+        },
+        {}
+      );
+      if (accountBalance.error || openOrders.error || positions.error || trade.error) {
+        console.log(
+          `Error fetching trade history for account ${account.name}:`,
+          accountBalance.error || openOrders.error || positions.error || trade.error
+        );
+        continue;
+      }
+      tradeHistory.push({
+        account,
+        balance: accountBalance.data as Balance,
+        openOrders: openOrders.data as OrderReturn[],
+        positions: positions.data as Position[],
+        trade: trade.data as Trade[],
+      });
     }
+    return tradeHistory;
+  }
+  public isRunning(): boolean {
+    return this.running;
   }
 }
 

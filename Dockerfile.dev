@@ -1,0 +1,22 @@
+# Development Dockerfile with hot reload support
+FROM node:20-alpine AS development
+
+WORKDIR /app
+
+# Enable pnpm
+RUN corepack enable pnpm
+
+# Copy package files and npmrc for hoisting config
+COPY package.json pnpm-lock.yaml .npmrc ./
+
+# Install all dependencies (including dev dependencies)
+RUN pnpm install --frozen-lockfile
+
+# Copy source files
+COPY . .
+
+# Expose the port
+EXPOSE 5002
+
+# Development command (will be overridden by docker-compose)
+CMD ["pnpm", "run", "dev"]

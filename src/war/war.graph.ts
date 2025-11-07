@@ -6,7 +6,6 @@ import { START, Annotation, messagesStateReducer } from '@langchain/langgraph';
 import type { BaseMessage } from 'langchain';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { EXTENDED_AGENT_PROMPT } from '../prompt/prompt';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { send_operation_tool, wait_tool } from '../tools/extended-war.tools';
 import type { AccountConfigWithModel, ConfigWithModel } from '../utils/config-loader';
 import { getCurrentContext } from '../utils/get-context';
