@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extended War Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Extended War Dashboard</h1>
+            <div class="status-bar">
+                <span class="status-indicator" id="statusIndicator">●</span>
+                <span id="statusText">Checking status...</span>
+            </div>
+        </header>
+
+        <section class="controls">
+            <h2>Controls</h2>
+            <div class="button-group">
+                <button id="startWarBtn" class="btn btn-success">Start War</button>
+                <button id="stopWarBtn" class="btn btn-danger">Stop War</button>
+                <button id="refreshBtn" class="btn btn-primary">Refresh Data</button>
+            </div>
+        </section>
+
+        <section class="statistics">
+            <h2>Performance Overview</h2>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-label">Loading...</div>
+                    <div class="stat-value">-</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="charts">
+            <h2>Performance Comparison</h2>
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </section>
+
+        <section class="details">
+            <div class="details-grid">
+                <div class="detail-panel">
+                    <h3>Open Positions</h3>
+                    <div id="positionsContainer" class="data-container">
+                        <p class="no-data">No positions available</p>
+                    </div>
+                </div>
+                <div class="detail-panel">
+                    <h3>Open Orders</h3>
+                    <div id="ordersContainer" class="data-container">
+                        <p class="no-data">No orders available</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="trade-history">
+            <h3>Recent Trades</h3>
+            <div id="tradesContainer" class="data-container">
+                <p class="no-data">No trades available</p>
+            </div>
+        </section>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

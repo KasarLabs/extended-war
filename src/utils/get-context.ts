@@ -1,9 +1,9 @@
-import {
-  tokenSupported,
-  type ContextsFormatted,
-  type ContextTokensCharts,
-  type ContextUserInformation,
-} from '../war/war.manager';
+import { tokenSupported } from '../war/war.manager';
+import type {
+  ContextsFormatted,
+  ContextTokensCharts,
+  ContextUserInformation,
+} from '../war/war.types';
 import type { AccountConfigWithModel } from './config-loader';
 import { getBalance } from './extended/tools/read/getBalance';
 import { getCandlesHistory } from './extended/tools/read/getCandlesHistory';

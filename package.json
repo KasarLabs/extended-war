@@ -14,8 +14,7 @@
     "test": "jest --detectOpenHandles",
     "clean": "rm -rf dist && rm -rf node_modules",
     "prepare": "husky",
-    "war:start": "bash scripts/start-war.sh",
-    "war:end": "bash scripts/end-war.sh"
+    "dashboard": "npx serve example -p 8080"
   },
   "jest": {
     "preset": "ts-jest",
