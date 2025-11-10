@@ -1,3 +1,4 @@
+import { th } from 'zod/v4/locales';
 import { tokenSupported } from '../war/war.manager';
 import type {
   ContextsFormatted,
@@ -6,9 +7,9 @@ import type {
 } from '../war/war.types';
 import type { AccountConfigWithModel } from './config-loader';
 import { getBalance } from './extended/tools/read/getBalance';
-import { getCandlesHistory } from './extended/tools/read/getCandlesHistory';
+import { getCandlesHistory, type Candle } from './extended/tools/read/getCandlesHistory';
 import { getCurrentLeverage } from './extended/tools/read/getLeverage';
-import { getMarkets } from './extended/tools/read/getMarkets';
+import { getMarkets, type MarketInfo } from './extended/tools/read/getMarkets';
 import { getOpenOrders } from './extended/tools/read/getOpenOrders';
 import { getPositions } from './extended/tools/read/getPositions';
 import { formatTokensChartsContext, formatUserInformationContext } from './format.utils';
@@ -39,8 +40,64 @@ export interface TradingLimits {
   limitPriceFloor: string;
 }
 
-export async function getCurrentContext(
-  config: AccountConfigWithModel
+export interface MarketContext {
+  token: string;
+  marketInfo: MarketInfo;
+  candleHistory: Candle[];
+}
+
+export async function getCurrentMarketInfo(
+  defaultConfig: AccountConfigWithModel
+): Promise<MarketContext[]> {
+  try {
+    const markets = await getMarkets(defaultConfig.extended, { markets: tokenSupported });
+    if (markets.status === 'failure' || !markets.data) {
+      throw new Error(`Failed to get markets: ${markets.error}`);
+    }
+    await getMarkets(defaultConfig.extended, { markets: ['BTC-USD'] }).then((res) => {
+      if (!res.data) {
+        throw new Error(`Failed to get BTC-USD market: ${res.error}`);
+      }
+      const btc = res.data.filter((market) => market.name === 'BTC-USD')[0];
+      markets.data?.push(btc);
+    });
+
+    console.log('Fetched Markets:', markets.data.length);
+    const candleHistoryMap = new Map<string, Candle[]>();
+
+    for (const token of tokenSupported) {
+      const response = await getCandlesHistory(defaultConfig.extended, {
+        market: token,
+        candleType: 'index-prices',
+        interval: '1h',
+        limit: 50,
+      });
+
+      if (!response || !response.data || response.status === 'failure') {
+        console.error(`Failed to get candle history for ${token}:`, response.error);
+        candleHistoryMap.set(token, []);
+        continue;
+      }
+      candleHistoryMap.set(token, response.data || []);
+    }
+    // Now map correctly using the token name
+    const marketContexts: MarketContext[] = markets.data
+      .filter((market) => tokenSupported.includes(market.name))
+      .map((market) => ({
+        token: market.name,
+        marketInfo: market,
+        candleHistory: candleHistoryMap.get(market.name) || [],
+      }));
+
+    return marketContexts;
+  } catch (error) {
+    throw new Error(`Failed to get market information: ${error}`);
+  }
+}
+
+export async function getCurrentAccountContext(
+  config: AccountConfigWithModel,
+  currentMarket: MarketContext[]
 ): Promise<ContextsFormatted> {
   const balance = getBalance(config.extended, {});
   const positions = getPositions(config.extended, {});
@@ -52,26 +109,15 @@ export async function getCurrentContext(
     positions: values[1].data || [],
     order: values[2].data || [],
   };
-  console.log('User Information:', user_info);
-  console.log('Current Open Orders:', open_orders);
   const contextTokenChars: ContextTokensCharts[] = [];
   for (const token of tokenSupported) {
-    const market = getMarkets(config.extended, { markets: [token] });
     const current_leverage = await getCurrentLeverage(config.extended, { market: token });
-    const candle_history = await getCandlesHistory(config.extended, {
-      market: token,
-      candleType: 'index-prices',
-      interval: '1h',
-      limit: 50,
-    });
-    await Promise.all([market, current_leverage, candle_history]).then((values) => {
-      const marketInfo = values[0].data?.filter((m: any) => m.name === token)[0];
+    await Promise.all([current_leverage]).then((values) => {
+      const marketInfo = currentMarket.find((market) => market.token === token)?.marketInfo;
       if (!marketInfo) {
-        console.warn(`Market information for ${token} not found.`);
+        console.error(`Market information not found for token: ${token}`);
         return;
       }
-      console.log(`Market Info for ${token}:`, marketInfo);
-
       // Create market_information matching MarketInformation interface
       const market_information: MarketInformation = {
         name: marketInfo.name,
@@ -96,13 +142,19 @@ export async function getCurrentContext(
           limitPriceFloor: marketInfo.tradingConfig.limitPriceFloor,
         },
       };
+      if (!values[0].data) {
+        throw new Error(`Failed to get leverage info for ${token}`);
+      }
 
-      console.log(`Leverage Info for ${token}:`, values[1].data);
+      const candleChartes = currentMarket.find((market) => market.token === token)?.candleHistory;
+      if (!candleChartes) {
+        throw new Error(`Failed to get candle history for ${token}`);
+      }
       // console.log(`Candle History for ${token}:`, values[2]);
       contextTokenChars.push({
         marketInformation: market_information!,
-        currentLeverage: values[1].data!,
-        candle_charts: values[2].data!,
+        currentLeverage: values[0].data!,
+        candleCharts: candleChartes,
       });
     });
   }

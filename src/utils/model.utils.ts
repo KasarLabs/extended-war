@@ -2,6 +2,7 @@ import type { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { ChatGroq } from '@langchain/groq';
 
 export interface ModelConfig {
   provider: string;
@@ -40,6 +41,15 @@ export function initializeModels(model: ModelConfig): BaseChatModel {
         modelInstance = new ChatGoogleGenerativeAI({
           model: model.modelName,
           verbose: false,
+          apiKey: model.apiKey,
+        });
+        break;
+
+      case 'groq':
+        console.log('Initializing Groq model with name:', model.apiKey);
+        modelInstance = new ChatGroq({
+          ...commonConfig,
+          model: model.modelName,
           apiKey: model.apiKey,
         });
         break;

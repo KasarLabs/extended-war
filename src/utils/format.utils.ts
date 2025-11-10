@@ -24,7 +24,7 @@ Trading Limits:
   - Limit Price Cap: ${market.trading.limitPriceCap}
   - Limit Price Floor: ${market.trading.limitPriceFloor}
 Current Leverage: ${JSON.stringify(tokenChart.currentLeverage)}
-Recent Candles (${tokenChart.candle_charts.length} data points): ${JSON.stringify(tokenChart.candle_charts.slice(-5))}
+Recent Candles (${tokenChart.candleCharts.length} data points): ${JSON.stringify(tokenChart.candleCharts.slice(-5))}
 `;
     })
     .join('\n---\n\n');

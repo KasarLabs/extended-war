@@ -13,7 +13,7 @@ const AccountConfigSchema = z.object({
     privateKey: z.string().min(1),
   }),
   model: z.object({
-    provider: z.enum(['anthropic', 'openai', 'gemini']),
+    provider: z.enum(['anthropic', 'openai', 'gemini', 'groq']),
     modelName: z.string().min(1),
     apiKey: z.string().min(1), // Direct API key value
   }),

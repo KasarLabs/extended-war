@@ -58,6 +58,7 @@ export interface EndWarResponseData {
  */
 export interface TradeHistoryResponseData {
   accounts: CleanAccountData[];
+  startPrice: number;
   timestamp: string;
 }
 

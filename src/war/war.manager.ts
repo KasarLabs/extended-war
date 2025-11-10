@@ -11,7 +11,7 @@ import { loadConfig, type Config, type ConfigWithModel } from '../utils/config-l
 import { initializeModels } from '../utils/model.utils';
 import { getTradesHistory } from '../utils/extended/tools/read/getTradesHistory';
 import type { HistoryTradeAccount } from './war.types';
-export { tokenSupported } from './war.types';
+export { tokenSupported, START_PRICE } from './war.types';
 
 export class ExtendedWarManager {
   private static instance: ExtendedWarManager | null = null;
@@ -78,6 +78,40 @@ export class ExtendedWarManager {
     }
   }
 
+  private async waitWithProgressBar(timeoutMs: number): Promise<void> {
+    const totalSeconds = Math.floor(timeoutMs / 1000);
+    const barLength = 40;
+
+    return new Promise((resolve) => {
+      let elapsed = 0;
+      const intervalMs = 1000; // Update every second
+
+      const updateProgress = () => {
+        elapsed += intervalMs;
+        const progress = elapsed / timeoutMs;
+        const filledLength = Math.floor(barLength * progress);
+        const emptyLength = barLength - filledLength;
+
+        const bar = '█'.repeat(filledLength) + '░'.repeat(emptyLength);
+        const percentage = Math.floor(progress * 100);
+        const remainingSeconds = Math.max(0, totalSeconds - Math.floor(elapsed / 1000));
+
+        process.stdout.write(
+          `\r⏳ Next cycle in: [${bar}] ${percentage}% (${remainingSeconds}s remaining)`
+        );
+
+        if (elapsed >= timeoutMs) {
+          clearInterval(interval);
+          process.stdout.write('\n');
+          resolve();
+        }
+      };
+
+      const interval = setInterval(updateProgress, intervalMs);
+      updateProgress(); // Initial update
+    });
+  }
+
   public async execute(): Promise<void> {
     if (!this.graph || !this.warGraphInstance) {
       throw new Error('WarGraph is not initialized. Call init() first.');
@@ -98,7 +132,7 @@ export class ExtendedWarManager {
         throw new Error('WAR_CYCLE_TIMEOUT_MS is not defined in environment variables.');
       }
       const cycleTimeout = Number.parseInt(process.env.WAR_CYCLE_TIMEOUT_MS, 10);
-      await new Promise((resolve) => setTimeout(resolve, cycleTimeout));
+      await this.waitWithProgressBar(cycleTimeout);
     }
     this.running = false;
     console.log('War execution completed.');

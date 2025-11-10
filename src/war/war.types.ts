@@ -10,9 +10,14 @@ import type { Candle } from '../utils/extended/tools/read/getCandlesHistory';
 import type { MarketInformation } from '../utils/get-context';
 
 /**
+ * Starting portfolio value for each agent in USD
+ */
+export const START_PRICE = 20;
+
+/**
  * Supported tokens for trading
  */
-export const tokenSupported = ['BTC-USD', 'ETH-USD', 'EUR-USD'] as const;
+export const tokenSupported = ['BTC-USD', 'ETH-USD', 'EUR-USD'];
 
 /**
  * Trade history for a specific account
@@ -48,5 +53,5 @@ export interface ContextUserInformation {
 export interface ContextTokensCharts {
   marketInformation: MarketInformation;
   currentLeverage: LeverageSetting[];
-  candle_charts: Candle[];
+  candleCharts: Candle[];
 }

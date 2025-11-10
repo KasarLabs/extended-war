@@ -1,10 +1,15 @@
 // Configuration
 const API_BASE_URL = 'http://localhost:5002';
 const REFRESH_INTERVAL = 5000; // 5 seconds
+const START_PRICE = 20; // Will be updated from API
 
 // State
 let refreshIntervalId = null;
 let performanceChart = null;
+let portfolioEvolutionChart = null;
+let portfolioHistory = {}; // Store portfolio history for each account
+let accountsData = []; // Store current accounts data
+let currentAgentFilter = 'all'; // Single global filter for all sections
 
 // DOM Elements
 const statusIndicator = document.getElementById('statusIndicator');
@@ -17,6 +22,7 @@ const positionsContainer = document.getElementById('positionsContainer');
 const ordersContainer = document.getElementById('ordersContainer');
 const tradesContainer = document.getElementById('tradesContainer');
 const notification = document.getElementById('notification');
+const agentFilter = document.getElementById('agentFilter');
 
 // Utility Functions
 function showNotification(message, type = 'info') {
@@ -107,11 +113,63 @@ async function stopWar() {
 async function fetchTradeHistory() {
     try {
         const data = await fetchAPI('/trade-history');
-        return data.data.accounts;
+        return {
+            accounts: data.data.accounts,
+            startPrice: data.data.startPrice || START_PRICE
+        };
     } catch (error) {
         showNotification('Failed to fetch trade history', 'error');
-        return [];
+        return { accounts: [], startPrice: START_PRICE };
     }
+}
+
+// Build portfolio history from trades
+function buildPortfolioHistory(accounts, startPrice) {
+    const history = {};
+
+    accounts.forEach(account => {
+        const accountName = account.account.name;
+        const trades = account.trade || [];
+
+        // Filter trades that have valid timestamps and sort them
+        const validTrades = trades.filter(trade => trade.createdTime && trade.createdTime > 0);
+        const sortedTrades = [...validTrades].sort((a, b) => a.createdTime - b.createdTime);
+
+        // Get current balance
+        const currentEquity = parseFloat(account.balance?.equity || startPrice);
+
+        // Initialize history for this account
+        history[accountName] = [];
+
+        // If there are trades, use the first trade time as start point
+        if (sortedTrades.length > 0) {
+            const firstTradeTime = sortedTrades[0].createdTime;
+
+            // Add start point shortly before first trade
+            history[accountName].push({
+                timestamp: firstTradeTime - 60000, // 1 minute before first trade
+                value: startPrice
+            });
+
+            // Add current equity as the final point
+            history[accountName].push({
+                timestamp: Date.now(),
+                value: currentEquity
+            });
+        } else {
+            // No trades yet - just show start value
+            history[accountName].push({
+                timestamp: Date.now() - 3600000, // 1 hour ago
+                value: startPrice
+            });
+            history[accountName].push({
+                timestamp: Date.now(),
+                value: currentEquity
+            });
+        }
+    });
+
+    return history;
 }
 
 // UI Update Functions
@@ -127,6 +185,21 @@ function updateStatus(isRunning) {
         startWarBtn.disabled = false;
         stopWarBtn.disabled = true;
     }
+}
+
+// Populate global filter dropdown with agent names
+function updateFilterDropdown(accounts) {
+    if (!accounts || accounts.length === 0) return;
+
+    const agentOptions = accounts.map(account => {
+        const name = account.account.name;
+        return `<option value="${name}">${name}</option>`;
+    }).join('');
+
+    // Update the global filter dropdown
+    const currentValue = agentFilter.value;
+    agentFilter.innerHTML = `<option value="all">All Agents</option>${agentOptions}`;
+    agentFilter.value = currentValue; // Restore previous selection
 }
 
 function updateStatistics(accounts) {
@@ -172,6 +245,164 @@ function updateStatistics(accounts) {
     });
 }
 
+function updatePortfolioEvolutionChart(history, startPrice) {
+    const ctx = document.getElementById('portfolioEvolutionChart').getContext('2d');
+
+    if (portfolioEvolutionChart) {
+        portfolioEvolutionChart.destroy();
+    }
+
+    // Check if there's any trade data
+    const hasTradeData = Object.values(history).some(points => points.length > 1);
+
+    if (!hasTradeData) {
+        // Show message if no trade data
+        ctx.canvas.parentElement.innerHTML = '<p class="no-data" style="text-align: center; padding: 40px;">No trade history available yet. Start trading to see portfolio evolution.</p>';
+        return;
+    }
+
+    // Generate color palette for each agent
+    const colors = [
+        { bg: 'rgba(99, 102, 241, 1)', border: 'rgba(99, 102, 241, 1)' },      // Indigo
+        { bg: 'rgba(16, 185, 129, 1)', border: 'rgba(16, 185, 129, 1)' },      // Emerald
+        { bg: 'rgba(245, 158, 11, 1)', border: 'rgba(245, 158, 11, 1)' },      // Amber
+        { bg: 'rgba(239, 68, 68, 1)', border: 'rgba(239, 68, 68, 1)' },        // Red
+        { bg: 'rgba(168, 85, 247, 1)', border: 'rgba(168, 85, 247, 1)' },      // Purple
+        { bg: 'rgba(236, 72, 153, 1)', border: 'rgba(236, 72, 153, 1)' },      // Pink
+    ];
+
+    // Find the earliest and latest timestamps across all accounts
+    let minTime = Infinity;
+    let maxTime = -Infinity;
+
+    Object.values(history).forEach(points => {
+        points.forEach(p => {
+            if (p.timestamp > 0) { // Ignore the start timestamp of 0
+                minTime = Math.min(minTime, p.timestamp);
+                maxTime = Math.max(maxTime, p.timestamp);
+            }
+        });
+    });
+
+    const datasets = Object.keys(history).map((accountName, idx) => {
+        const points = history[accountName];
+        const color = colors[idx % colors.length];
+
+        // Convert data points, using actual timestamps
+        const chartData = points.map(p => {
+            // For start point (timestamp 0), use minTime or a slightly earlier time
+            const xValue = p.timestamp === 0
+                ? (minTime !== Infinity ? minTime - 60000 : Date.now() - 3600000) // 1 min before first trade or 1 hour ago
+                : p.timestamp;
+
+            return { x: xValue, y: p.value };
+        });
+
+        return {
+            label: accountName,
+            data: chartData,
+            borderColor: color.border,
+            backgroundColor: color.bg,
+            borderWidth: 3,
+            fill: false,
+            tension: 0.1,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            spanGaps: false,
+        };
+    });
+
+    portfolioEvolutionChart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'nearest',
+                intersect: false,
+                axis: 'x'
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        color: '#e2e8f0',
+                        font: { size: 13, weight: '500' },
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                    },
+                },
+                title: {
+                    display: true,
+                    text: `Portfolio Value Evolution (Starting: $${startPrice})`,
+                    color: '#e2e8f0',
+                    font: { size: 18, weight: 'bold' },
+                    padding: 20,
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleColor: '#e2e8f0',
+                    bodyColor: '#e2e8f0',
+                    borderColor: 'rgba(148, 163, 184, 0.3)',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
+                        },
+                        title: function(contexts) {
+                            const timestamp = contexts[0].parsed.x;
+                            return new Date(timestamp).toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'minute',
+                        displayFormats: {
+                            minute: 'HH:mm',
+                            hour: 'HH:mm',
+                            day: 'MMM D'
+                        },
+                        tooltipFormat: 'PPpp'
+                    },
+                    ticks: {
+                        color: '#94a3b8',
+                        maxRotation: 45,
+                        minRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: 10
+                    },
+                    grid: {
+                        color: 'rgba(51, 65, 85, 0.3)',
+                        drawBorder: false,
+                    },
+                },
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        color: '#94a3b8',
+                        callback: function(value) {
+                            return '$' + value.toFixed(2);
+                        },
+                    },
+                    grid: {
+                        color: 'rgba(51, 65, 85, 0.3)',
+                        drawBorder: false,
+                    },
+                },
+            },
+        },
+    });
+}
+
 function updatePerformanceChart(accounts) {
     if (!accounts || accounts.length === 0) {
         return;
@@ -198,8 +429,8 @@ function updatePerformanceChart(accounts) {
                 {
                     label: 'Equity',
                     data: balances,
-                    backgroundColor: 'rgba(79, 70, 229, 0.8)',
-                    borderColor: 'rgba(79, 70, 229, 1)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                    borderColor: 'rgba(99, 102, 241, 1)',
                     borderWidth: 2,
                 },
                 {
@@ -225,19 +456,12 @@ function updatePerformanceChart(accounts) {
                 legend: {
                     display: true,
                     labels: {
-                        color: '#f1f5f9',
-                        font: {
-                            size: 12,
-                        },
+                        color: '#e2e8f0',
+                        font: { size: 12, weight: '500' },
                     },
                 },
                 title: {
-                    display: true,
-                    text: 'Account Performance Comparison',
-                    color: '#f1f5f9',
-                    font: {
-                        size: 16,
-                    },
+                    display: false,
                 },
             },
             scales: {
@@ -250,7 +474,7 @@ function updatePerformanceChart(accounts) {
                         },
                     },
                     grid: {
-                        color: 'rgba(51, 65, 85, 0.5)',
+                        color: 'rgba(51, 65, 85, 0.3)',
                     },
                 },
                 x: {
@@ -258,7 +482,7 @@ function updatePerformanceChart(accounts) {
                         color: '#94a3b8',
                     },
                     grid: {
-                        color: 'rgba(51, 65, 85, 0.5)',
+                        color: 'rgba(51, 65, 85, 0.3)',
                     },
                 },
             },
@@ -269,9 +493,13 @@ function updatePerformanceChart(accounts) {
 function updatePositions(accounts) {
     positionsContainer.innerHTML = '';
 
+    const filteredAccounts = currentAgentFilter === 'all'
+        ? accounts
+        : accounts.filter(acc => acc.account.name === currentAgentFilter);
+
     let hasPositions = false;
 
-    accounts.forEach(account => {
+    filteredAccounts.forEach(account => {
         if (account.positions && account.positions.length > 0) {
             hasPositions = true;
 
@@ -335,9 +563,13 @@ function updatePositions(accounts) {
 function updateOrders(accounts) {
     ordersContainer.innerHTML = '';
 
+    const filteredAccounts = currentAgentFilter === 'all'
+        ? accounts
+        : accounts.filter(acc => acc.account.name === currentAgentFilter);
+
     let hasOrders = false;
 
-    accounts.forEach(account => {
+    filteredAccounts.forEach(account => {
         if (account.openOrders && account.openOrders.length > 0) {
             hasOrders = true;
 
@@ -395,9 +627,13 @@ function updateOrders(accounts) {
 function updateTrades(accounts) {
     tradesContainer.innerHTML = '';
 
+    const filteredAccounts = currentAgentFilter === 'all'
+        ? accounts
+        : accounts.filter(acc => acc.account.name === currentAgentFilter);
+
     let allTrades = [];
 
-    accounts.forEach(account => {
+    filteredAccounts.forEach(account => {
         if (account.trade && account.trade.length > 0) {
             account.trade.forEach(trade => {
                 allTrades.push({
@@ -475,11 +711,24 @@ async function refreshData() {
         refreshBtn.disabled = true;
         refreshBtn.textContent = 'Refreshing...';
 
-        const [isRunning, accounts] = await Promise.all([
+        const [status, tradeData] = await Promise.all([
             checkWarStatus(),
             fetchTradeHistory(),
         ]);
 
+        const { accounts, startPrice } = tradeData;
+
+        // Store accounts data globally
+        accountsData = accounts;
+
+        // Update filter dropdown
+        updateFilterDropdown(accounts);
+
+        // Build and update portfolio history
+        const history = buildPortfolioHistory(accounts, startPrice);
+        updatePortfolioEvolutionChart(history, startPrice);
+
+        // Update other charts and data
         updateStatistics(accounts);
         updatePerformanceChart(accounts);
         updatePositions(accounts);
@@ -514,6 +763,15 @@ function stopAutoRefresh() {
 startWarBtn.addEventListener('click', startWar);
 stopWarBtn.addEventListener('click', stopWar);
 refreshBtn.addEventListener('click', refreshData);
+
+// Global filter event listener
+agentFilter.addEventListener('change', (e) => {
+    currentAgentFilter = e.target.value;
+    // Update all sections with the new filter
+    updatePositions(accountsData);
+    updateOrders(accountsData);
+    updateTrades(accountsData);
+});
 
 // Initialize
 async function initialize() {

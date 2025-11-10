@@ -3,7 +3,7 @@ const { json, urlencoded } = bodyParser;
 import express, { type Express, type Request, type Response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import war from './war/war.manager';
+import war, { START_PRICE } from './war/war.manager';
 import type {
   ApiResponse,
   StartWarResponseData,
@@ -119,6 +119,7 @@ export const createServer = (): Express => {
             message: 'Trade history retrieved successfully',
             data: {
               accounts: cleanHistory,
+              startPrice: START_PRICE,
               timestamp: new Date().toISOString(),
             },
           });
