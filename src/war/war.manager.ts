@@ -94,7 +94,10 @@ export class ExtendedWarManager {
       });
 
       console.log('WarGraph execution cycle completed. Waiting for next cycle...');
-      const cycleTimeout = Number.parseInt(process.env.WAR_CYCLE_TIMEOUT_MS || '10000', 10);
+      if (process.env.WAR_CYCLE_TIMEOUT_MS === undefined) {
+        throw new Error('WAR_CYCLE_TIMEOUT_MS is not defined in environment variables.');
+      }
+      const cycleTimeout = Number.parseInt(process.env.WAR_CYCLE_TIMEOUT_MS, 10);
       await new Promise((resolve) => setTimeout(resolve, cycleTimeout));
     }
     this.running = false;

@@ -103,11 +103,22 @@ export const createServer = (): Express => {
       async (req: Request, res: Response<ApiResponse<TradeHistoryResponseData>>) => {
         try {
           const history = await war.getTradesHistory();
+          // Clean up circular references (model and mcpClient)
+          const cleanHistory = history.map((item) => ({
+            account: {
+              name: item.account.name,
+              extended: item.account.extended,
+            },
+            balance: item.balance,
+            openOrders: item.openOrders,
+            positions: item.positions,
+            trade: item.trade,
+          }));
           return res.status(200).json({
             success: true,
             message: 'Trade history retrieved successfully',
             data: {
-              accounts: history,
+              accounts: cleanHistory,
               timestamp: new Date().toISOString(),
             },
           });

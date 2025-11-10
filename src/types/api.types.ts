@@ -1,4 +1,22 @@
-import type { HistoryTradeAccount } from '../war/war.types';
+import type { Balance, OrderReturn, Position, Trade } from '../utils/extended/lib/types';
+
+/**
+ * Cleaned account data for API response (without circular references)
+ */
+export interface CleanAccountData {
+  account: {
+    name: string;
+    extended: {
+      apiUrl: string;
+      apiKey: string;
+      privateKey: string;
+    };
+  };
+  balance: Balance;
+  openOrders: OrderReturn[];
+  positions: Position[];
+  trade: Trade[];
+}
 
 /**
  * Base API response structure
@@ -39,7 +57,7 @@ export interface EndWarResponseData {
  * Trade history response data
  */
 export interface TradeHistoryResponseData {
-  accounts: HistoryTradeAccount[];
+  accounts: CleanAccountData[];
   timestamp: string;
 }
 

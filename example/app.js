@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://localhost:5002';
 const REFRESH_INTERVAL = 5000; // 5 seconds
 
 // State
@@ -523,9 +523,8 @@ async function initialize() {
         const isRunning = await checkWarStatus();
         await refreshData();
 
-        if (isRunning) {
-            startAutoRefresh();
-        }
+        // Always start auto-refresh to keep data updated
+        startAutoRefresh();
     } catch (error) {
         console.error('Initialization error:', error);
         showNotification('Failed to initialize dashboard', 'error');
