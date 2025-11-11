@@ -57,7 +57,7 @@ RUN chown -R nodejs:nodejs /app
 USER nodejs
 
 # Expose the port the app runs on
-EXPOSE 5002
+EXPOSE 5004
 
 # Start the application
 CMD ["node", "dist/index.js"]

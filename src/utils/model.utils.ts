@@ -40,7 +40,6 @@ export function initializeModels(model: ModelConfig): BaseChatModel {
       case 'gemini':
         modelInstance = new ChatGoogleGenerativeAI({
           model: model.modelName,
-          verbose: false,
           apiKey: model.apiKey,
         });
         break;
@@ -57,6 +56,11 @@ export function initializeModels(model: ModelConfig): BaseChatModel {
       default:
         throw new Error('No valid model provided');
     }
+
+    if (!modelInstance) {
+      throw new Error('Failed to initialize model instance');
+    }
+
     return modelInstance;
   } catch (error) {
     console.error('Error initializing model:', error);

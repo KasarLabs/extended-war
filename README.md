@@ -124,7 +124,7 @@ pnpm run build
 pnpm run dev
 ```
 
-The server will start on `http://localhost:5002`.
+The server will start on `http://localhost:5004`.
 
 ### Production Mode
 
@@ -271,7 +271,7 @@ docker build -t extended-war:latest .
 ```bash
 docker run -d \
   --name extended-war \
-  -p 5002:5002 \
+  -p 5004:5004 \
   --env-file .env \
   -v $(pwd)/config:/app/config:ro \
   extended-war:latest
@@ -369,17 +369,17 @@ pnpm run test -- --watch
 
 ### Port Already in Use
 
-If port 5002 is already in use:
+If port 5004 is already in use:
 
 ```bash
 # Find the process
-lsof -i :5002
+lsof -i :5004
 
 # Kill it
 kill -9 <PID>
 
 # Or change the port in docker-compose.yml or when running
-PORT=5003 pnpm run dev
+PORT=5004 pnpm run dev
 ```
 
 ### Docker Build Fails

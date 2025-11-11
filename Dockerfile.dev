@@ -16,7 +16,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Expose the port
-EXPOSE 5002
+EXPOSE 5004
 
 # Development command (will be overridden by docker-compose)
 CMD ["pnpm", "run", "dev"]

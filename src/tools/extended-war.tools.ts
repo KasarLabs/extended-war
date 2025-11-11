@@ -7,7 +7,7 @@ export const send_operation_tool = new DynamicStructuredTool({
   schema: z.object({
     operation: z.string().describe('The operation query to perform.'),
   }),
-  func: async (input) => {},
+  func: async (input: { operation: string }) => {},
 });
 
 export const wait_tool = new DynamicStructuredTool({
@@ -17,5 +17,5 @@ export const wait_tool = new DynamicStructuredTool({
   schema: z.object({
     reason: z.string().describe('The reason for waiting.'),
   }),
-  func: async (input) => {},
+  func: async (input: { reason: string }) => {},
 });

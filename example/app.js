@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE_URL = 'http://localhost:5002';
+const API_BASE_URL = 'http://localhost:5004';
 const REFRESH_INTERVAL = 5000; // 5 seconds
 const START_PRICE = 20; // Will be updated from API
 

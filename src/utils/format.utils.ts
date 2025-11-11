@@ -1,4 +1,4 @@
-import type { ContextTokensCharts, ContextUserInformation } from '../war/war.types';
+import type { ContextTokensCharts, ContextUserInformation } from '../war/war.types.js';
 
 export function formatTokensChartsContext(rawContext: ContextTokensCharts[]): string {
   const formattedCharts = rawContext

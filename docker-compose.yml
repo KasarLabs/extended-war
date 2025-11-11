@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: extended-war
     ports:
-      - "5002:5002"
+      - "5004:5004"
     environment:
       - NODE_ENV=production
     env_file:
@@ -29,7 +29,7 @@ services:
       target: development
     container_name: extended-war-dev
     ports:
-      - "5002:5002"
+      - "5005:5004"
     environment:
       - NODE_ENV=development
     env_file:

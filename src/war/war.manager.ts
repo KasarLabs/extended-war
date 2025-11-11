@@ -1,17 +1,17 @@
 import { randomUUID } from 'node:crypto';
-import { getBalance } from '../utils/extended/tools/read/getBalance';
+import { getBalance } from '../utils/extended/tools/read/getBalance.js';
 import type { Balance, OrderReturn, Position, Trade } from '../utils/extended/lib/types';
-import { getPositions } from '../utils/extended/tools/read/getPositions';
-import { getOpenOrders } from '../utils/extended/tools/read/getOpenOrders';
-import { WarGraph } from './war.graph';
+import { getPositions } from '../utils/extended/tools/read/getPositions.js';
+import { getOpenOrders } from '../utils/extended/tools/read/getOpenOrders.js';
+import { WarGraph } from './war.graph.js';
 import type { CompiledStateGraph } from '@langchain/langgraph';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { loadConfig, type Config, type ConfigWithModel } from '../utils/config-loader';
-import { initializeModels } from '../utils/model.utils';
-import { getTradesHistory } from '../utils/extended/tools/read/getTradesHistory';
-import type { HistoryTradeAccount } from './war.types';
-export { tokenSupported, START_PRICE } from './war.types';
+import { loadConfig, type Config, type ConfigWithModel } from '../utils/config-loader.js';
+import { initializeModels } from '../utils/model.utils.js';
+import { getTradesHistory } from '../utils/extended/tools/read/getTradesHistory.js';
+import type { HistoryTradeAccount } from './war.types.js';
+export { tokenSupported, START_PRICE } from './war.types.js';
 
 export class ExtendedWarManager {
   private static instance: ExtendedWarManager | null = null;
@@ -122,8 +122,9 @@ export class ExtendedWarManager {
     }
     const thread_id = randomUUID();
     this.running = true;
+    const message = { messages: [] };
     while (this.signal.signal.aborted === false) {
-      await this.graph.invoke('', {
+      await this.graph.invoke(message, {
         configurable: { thread_id },
       });
 

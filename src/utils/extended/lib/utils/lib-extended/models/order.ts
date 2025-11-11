@@ -113,7 +113,7 @@ export class Order {
     this.debuggingAmounts = debuggingAmounts;
   }
 
-  toJSON() {
+  toJSON(): Record<string, any> {
     return omitUndefined({
       id: this.id ? Long(this.id, 16).toString(10) : undefined,
       market: this.market,

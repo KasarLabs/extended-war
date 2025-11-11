@@ -3,7 +3,7 @@ const { json, urlencoded } = bodyParser;
 import express, { type Express, type Request, type Response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import war, { START_PRICE } from './war/war.manager';
+import war, { START_PRICE } from './war/war.manager.js';
 import type {
   ApiResponse,
   StartWarResponseData,
@@ -11,7 +11,7 @@ import type {
   TradeHistoryResponseData,
   HealthCheckResponseData,
   WarRunningStatusResponseData,
-} from './types/api.types';
+} from './types/api.types.js';
 
 export const createServer = (): Express => {
   const app = express();

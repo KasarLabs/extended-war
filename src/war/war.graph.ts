@@ -5,14 +5,14 @@ import { END, StateGraph } from '@langchain/langgraph';
 import { START, Annotation, messagesStateReducer } from '@langchain/langgraph';
 import type { BaseMessage } from 'langchain';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { EXTENDED_AGENT_PROMPT } from '../prompt/prompt';
-import { send_operation_tool, wait_tool } from '../tools/extended-war.tools';
-import type { AccountConfigWithModel, ConfigWithModel } from '../utils/config-loader';
+import { EXTENDED_AGENT_PROMPT } from '../prompt/prompt.js';
+import { send_operation_tool, wait_tool } from '../tools/extended-war.tools.js';
+import type { AccountConfigWithModel, ConfigWithModel } from '../utils/config-loader.js';
 import {
   getCurrentAccountContext,
   getCurrentMarketInfo,
   type MarketContext,
-} from '../utils/get-context';
+} from '../utils/get-context.js';
 import { get } from 'http';
 import type { MarketInfo } from '../utils/extended/tools/read/getMarkets';
 import { logger } from 'starknet';

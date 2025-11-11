@@ -4,7 +4,7 @@ import { validateEnv } from './utils/env-validator.js';
 // Validate environment variables before starting the server
 validateEnv();
 
-const PORT = 5002;
+const PORT = 5004;
 const server = createServer();
 
 server.listen(PORT, () => {

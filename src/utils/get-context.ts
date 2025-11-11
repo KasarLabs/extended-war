@@ -1,18 +1,18 @@
 import { th } from 'zod/v4/locales';
-import { tokenSupported } from '../war/war.manager';
+import { tokenSupported } from '../war/war.manager.js';
 import type {
   ContextsFormatted,
   ContextTokensCharts,
   ContextUserInformation,
-} from '../war/war.types';
-import type { AccountConfigWithModel } from './config-loader';
-import { getBalance } from './extended/tools/read/getBalance';
-import { getCandlesHistory, type Candle } from './extended/tools/read/getCandlesHistory';
-import { getCurrentLeverage } from './extended/tools/read/getLeverage';
-import { getMarkets, type MarketInfo } from './extended/tools/read/getMarkets';
-import { getOpenOrders } from './extended/tools/read/getOpenOrders';
-import { getPositions } from './extended/tools/read/getPositions';
-import { formatTokensChartsContext, formatUserInformationContext } from './format.utils';
+} from '../war/war.types.js';
+import type { AccountConfigWithModel } from './config-loader.js';
+import { getBalance } from './extended/tools/read/getBalance.js';
+import { getCandlesHistory, type Candle } from './extended/tools/read/getCandlesHistory.js';
+import { getCurrentLeverage } from './extended/tools/read/getLeverage.js';
+import { getMarkets, type MarketInfo } from './extended/tools/read/getMarkets.js';
+import { getOpenOrders } from './extended/tools/read/getOpenOrders.js';
+import { getPositions } from './extended/tools/read/getPositions.js';
+import { formatTokensChartsContext, formatUserInformationContext } from './format.utils.js';
 
 export interface MarketInformation {
   name: string;
