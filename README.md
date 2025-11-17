@@ -1,83 +1,78 @@
-# Extended War - AI Trading Bot
+# Extended War - AI Trading Bot Showcase
 
-An AI-powered trading bot for Extended Exchange on Starknet, featuring multi-agent support with various AI models (Anthropic Claude, Google Gemini, OpenAI).
+> A showcase project demonstrating the capabilities of [ask-starknet](https://github.com/KasarLabs/ask-starknet) - an AI-powered tool that enables autonomous agents to interact with the Starknet blockchain.
 
-## Table of Contents
+This project showcases how AI agents can autonomously trade on Extended Exchange (X10) using the ask-starknet MCP server. Multiple AI models (Claude, Gemini, GPT) compete against each other in automated trading scenarios.
 
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Running the Application](#running-the-application)
-- [API Endpoints](#api-endpoints)
-- [Docker Deployment](#docker-deployment)
-- [Development](#development)
-- [Project Structure](#project-structure)
-- [Testing](#testing)
+## What is ask-starknet?
+
+[ask-starknet](https://github.com/KasarLabs/ask-starknet) is a Model Context Protocol (MCP) server that allows AI agents to interact with the Starknet blockchain. It provides:
+
+- Natural language interaction with Starknet
+- Smart contract querying and execution
+- Real-time blockchain data access
+- AI-powered transaction analysis
+
+**Extended War** demonstrates these capabilities by creating autonomous trading agents that use ask-starknet to:
+- Query market data from Extended Exchange
+- Analyze trading opportunities
+- Execute trades on Starknet
+- Monitor positions and balances
 
 ## Features
 
-- **Multi-Agent Support**: Run multiple trading agents simultaneously with different AI models
-- **AI Model Flexibility**: Support for Anthropic Claude, Google Gemini, and OpenAI models
-- **Extended Exchange Integration**: Full integration with Extended Exchange on Starknet
-- **RESTful API**: Simple HTTP API to control the bot
-- **Docker Support**: Production-ready Docker configuration
-- **TypeScript**: Fully typed codebase for better DX and reliability
-- **Real-time Trading**: Automated trading with configurable intervals
+- **Multi-Agent Trading**: Run multiple AI agents simultaneously with different models
+- **AI Model Support**: Anthropic Claude, Google Gemini, and OpenAI GPT
+- **Starknet Integration**: Full integration via ask-starknet MCP server
+- **RESTful API**: Simple HTTP API to control and monitor the bots
+- **Docker Support**: Production-ready containerized deployment
+- **Real-time Monitoring**: Track agent performance and trading history
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
-
 - **Node.js** >= 20.x
-- **pnpm** >= 9.x (or use `corepack enable pnpm`)
-- **Docker** (optional, for containerized deployment)
+- **pnpm** >= 9.x
+- **Docker** (optional)
 - **Extended Exchange Account** with API credentials
-- **AI Model API Keys** (Anthropic, Google, or OpenAI)
+- **AI Model API Keys** (at least one: Anthropic, Google, or OpenAI)
+- **ask-starknet** - Clone and set up from [github.com/KasarLabs/ask-starknet](https://github.com/KasarLabs/ask-starknet)
 
-## Installation
+## Quick Start
 
-### Step 1: Clone the Repository
+### 1. Clone and Install
 
 ```bash
-git clone https://github.com/your-org/extended-war.git
+git clone https://github.com/KasarLabs/extended-war.git
 cd extended-war
-```
-
-### Step 2: Install Dependencies
-
-```bash
-# Enable pnpm if not already available
 corepack enable pnpm
-
-# Install dependencies
 pnpm install
 ```
 
-### Step 3: Set Up Environment Variables
-
-Copy the example environment file:
+### 2. Configure Environment
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and configure:
+Edit `.env` with your settings:
 
 ```env
-# Starknet Configuration
-STARKNET_RPC_URL="https://starknet-mainnet.public.blastapi.io"
+# Server
+PORT=5050
+NODE_ENV=development
+API_SECRET=your_secure_secret_here
 
-# LangSmith Configuration (Optional - for tracing and monitoring)
-LANGSMITH_TRACING=true
-LANGSMITH_ENDPOINT="https://eu.api.smith.langchain.com/"
-LANGSMITH_API_KEY="lsv2_pt_..."
-LANGSMITH_PROJECT="your-project-name"
+# Starknet
+STARKNET_RPC_URL=https://starknet-mainnet.public.blastapi.io
+
+# AI Provider (choose one)
+ANTHROPIC_API_KEY=your_key_here
+ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
 ```
 
-### Step 4: Configure Trading Accounts
+See [.env.example](.env.example) for all configuration options.
 
-Copy the example config file:
+### 3. Configure Trading Accounts
 
 ```bash
 cp config/extended-war.config.example.json config/extended-war.config.json
@@ -89,15 +84,15 @@ Edit `config/extended-war.config.json`:
 {
   "accounts": [
     {
-      "name": "Agent 1",
+      "name": "Claude Agent",
       "extended": {
-        "apiUrl": "https://api.starknet.extended.exchange",
+        "apiUrl": "https://api.x10.exchange",
         "apiKey": "YOUR_EXTENDED_API_KEY",
         "privateKey": "0xYOUR_STARKNET_PRIVATE_KEY"
       },
       "model": {
         "provider": "anthropic",
-        "name": "claude-sonnet-4-20250514",
+        "name": "claude-3-5-sonnet-20241022",
         "apiKey": "sk-ant-api03-..."
       }
     }
@@ -105,141 +100,89 @@ Edit `config/extended-war.config.json`:
 }
 ```
 
-**Supported AI Providers:**
-- `anthropic`: Claude models (claude-sonnet-4, claude-opus-4, etc.)
-- `gemini`: Google Gemini models (gemini-2.5-flash, gemini-2.0-pro, etc.)
-- `openai`: OpenAI models (gpt-4-turbo, gpt-4o, etc.)
+### 4. Set Up ask-starknet
 
-### Step 5: Build the Project
+Clone and configure ask-starknet:
 
 ```bash
-pnpm run build
+cd ..
+git clone https://github.com/KasarLabs/ask-starknet.git
+cd ask-starknet
+# Follow ask-starknet setup instructions
 ```
 
-## Running the Application
+Update the path in Extended War if needed (default: `../ask-starknet/packages/mcp/build/index.js`)
 
-### Development Mode (with hot reload)
+### 5. Build and Run
 
 ```bash
+# Development mode (with hot reload)
 pnpm run dev
-```
 
-The server will start on `http://localhost:5004`.
-
-### Production Mode
-
-```bash
-# Build first
+# Production mode
 pnpm run build
-
-# Start the server
 pnpm start
 ```
 
+The server runs on `http://localhost:5050` by default.
+
 ## API Endpoints
 
-The bot exposes the following RESTful API endpoints:
+### Public Endpoints (No Authentication)
 
-### 1. Health Check
-
-**GET** `/health`
-
-Check if the service is running.
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Service is healthy",
-  "data": {
-    "status": "ok",
-    "uptime": 123.456,
-    "timestamp": "2025-11-07T14:30:00.000Z"
-  }
-}
+#### Health Check
+```bash
+GET /health
 ```
 
-### 2. Start Trading Bot
-
-**POST** `/start-war`
-
-Initialize and start all trading agents.
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "War started successfully",
-  "data": {
-    "status": "started",
-    "startedAt": "2025-11-07T14:30:00.000Z"
-  }
-}
+#### Check War Status
+```bash
+GET /is-war-running
 ```
 
-### 3. Stop Trading Bot
+### Protected Endpoints (Requires API Secret)
 
-**POST** `/end-war`
+All protected endpoints require the `X-API-Secret` header:
 
-Stop all trading agents.
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "War stopped successfully",
-  "data": {
-    "status": "stopped",
-    "stoppedAt": "2025-11-07T14:35:00.000Z"
-  }
-}
+```bash
+X-API-Secret: your_secure_secret_here
 ```
 
-### 4. Get Trade History
+#### Start Trading Bots
+```bash
+POST /api/start-war
+```
 
-**GET** `/trade-history`
+#### Stop Trading Bots
+```bash
+POST /api/end-war
+```
 
-Retrieve trading history for all configured accounts.
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Trade history retrieved successfully",
-  "data": {
-    "accounts": [
-      {
-        "account": { "name": "Agent 1", ... },
-        "balance": { ... },
-        "openOrders": [ ... ],
-        "positions": [ ... ],
-        "trade": [ ... ]
-      }
-    ],
-    "timestamp": "2025-11-07T14:30:00.000Z"
-  }
-}
+#### Get Trading History
+```bash
+GET /api/trade-history
 ```
 
 ### Using Postman
 
-A complete Postman collection is available in [`postman_collection.json`](postman_collection.json).
+Import [postman_collection.json](postman_collection.json) into Postman:
 
-**Import Steps:**
 1. Open Postman
 2. Click **Import**
 3. Select `postman_collection.json`
-4. The collection includes all endpoints with example responses
+4. Update the `api_secret` variable with your API secret
+5. Update `base_url` if not using default port
 
 ## Docker Deployment
 
-### Using Docker Compose (Recommended)
-
-#### Production
+### Using Docker Compose
 
 ```bash
-# Build and start
+# Production
 docker-compose up -d extended-war
+
+# Development (with hot reload)
+docker-compose up -d extended-war-dev
 
 # View logs
 docker-compose logs -f extended-war
@@ -248,180 +191,144 @@ docker-compose logs -f extended-war
 docker-compose down
 ```
 
-#### Development (with hot reload)
-
-```bash
-# Start development container
-docker-compose up -d extended-war-dev
-
-# View logs
-docker-compose logs -f extended-war-dev
-```
-
 ### Using Docker CLI
 
-#### Build the Image
-
 ```bash
+# Build
 docker build -t extended-war:latest .
-```
 
-#### Run the Container
-
-```bash
+# Run
 docker run -d \
   --name extended-war \
-  -p 5004:5004 \
+  -p 5050:5050 \
   --env-file .env \
   -v $(pwd)/config:/app/config:ro \
   extended-war:latest
 ```
-
-## Development
-
-### Available Scripts
-
-- `pnpm run dev` - Start development server with hot reload
-- `pnpm run build` - Build TypeScript to JavaScript
-- `pnpm run start` - Start production server
-- `pnpm run check-types` - Type check without emitting files
-- `pnpm run lint` - Lint code with ESLint
-- `pnpm run format` - Format code with Prettier
-- `pnpm run format:check` - Check code formatting
-- `pnpm run test` - Run tests with Jest
-- `pnpm run clean` - Remove dist and node_modules
-
-### Code Quality
-
-This project uses:
-
-- **TypeScript** for type safety
-- **ESLint** for code linting
-- **Prettier** for code formatting
-- **Husky** for git hooks
-- **Jest** for testing
-
-### Pre-commit Hooks
-
-Husky runs the following before each commit:
-- Type checking
-- Linting
-- Format checking
 
 ## Project Structure
 
 ```
 extended-war/
 ├── src/
-│   ├── prompt/              # AI prompts
-│   ├── tools/               # Trading tools
-│   ├── types/               # TypeScript type definitions
-│   │   └── api.types.ts     # API response types
-│   ├── utils/               # Utility functions
-│   │   ├── config-loader.ts # Configuration management
-│   │   ├── model.utils.ts   # AI model initialization
-│   │   └── extended/        # Extended Exchange SDK
-│   ├── war/                 # Trading bot core
-│   │   ├── war.graph.ts     # LangGraph workflow
-│   │   ├── war.manager.ts   # Bot manager
-│   │   └── war.types.ts     # War-specific types
-│   ├── index.ts             # Application entry point
-│   └── server.ts            # Express server
+│   ├── prompt/              # AI agent prompts
+│   ├── tools/               # Trading tools for agents
+│   ├── types/               # TypeScript definitions
+│   ├── utils/               # Utilities and Extended SDK
+│   ├── war/                 # Trading bot core logic
+│   │   ├── war.graph.ts     # LangGraph agent workflow
+│   │   ├── war.manager.ts   # Bot orchestration
+│   │   └── war.types.ts     # Type definitions
+│   ├── middleware/          # Express middleware
+│   ├── index.ts             # Entry point
+│   └── server.ts            # API server
 ├── config/
-│   ├── extended-war.config.json         # Your config (gitignored)
-│   └── extended-war.config.example.json # Config template
-├── dist/                    # Compiled JavaScript (gitignored)
-├── Dockerfile               # Production Docker image
-├── Dockerfile.dev           # Development Docker image
-├── docker-compose.yml       # Docker Compose configuration
-├── postman_collection.json  # Postman API collection
-├── package.json
-├── tsconfig.json
-└── README.md
+│   ├── extended-war.config.json         # Your config (git-ignored)
+│   └── extended-war.config.example.json # Template
+├── postman_collection.json  # API collection
+├── Dockerfile               # Production image
+├── Dockerfile.dev           # Development image
+└── docker-compose.yml       # Docker Compose config
 ```
 
-## Testing
+## Development
 
-### Run Tests
+### Available Scripts
 
 ```bash
-pnpm run test
+pnpm run dev          # Start with hot reload
+pnpm run build        # Build TypeScript
+pnpm start            # Start production server
+pnpm run check-types  # Type check
+pnpm run lint         # Lint code
+pnpm run format       # Format code
+pnpm run test         # Run tests
+pnpm run clean        # Clean build artifacts
 ```
 
-### Run Tests in Watch Mode
+### Supported AI Providers
 
-```bash
-pnpm run test -- --watch
-```
+- **Anthropic**: `claude-3-5-sonnet-20241022`, `claude-3-opus-20240229`, etc.
+- **Google**: `gemini-2.0-flash-exp`, `gemini-1.5-pro`, etc.
+- **OpenAI**: `gpt-4-turbo-preview`, `gpt-4o`, etc.
+
+## How It Works
+
+1. **Initialization**: Each agent connects to Extended Exchange and ask-starknet MCP server
+2. **Market Analysis**: Agents use ask-starknet to query market data and blockchain state
+3. **Decision Making**: AI models analyze data and decide on trading actions
+4. **Trade Execution**: Agents execute trades through Extended Exchange via Starknet
+5. **Monitoring**: Real-time tracking of positions, balances, and performance
+
+The project uses [LangGraph](https://github.com/langchain-ai/langgraph) to orchestrate agent workflows and [ask-starknet](https://github.com/KasarLabs/ask-starknet) for blockchain interactions.
 
 ## Environment Variables
 
 | Variable | Description | Required |
 |----------|-------------|----------|
+| `PORT` | API server port | Yes |
+| `API_SECRET` | Authentication secret | Yes |
 | `STARKNET_RPC_URL` | Starknet RPC endpoint | Yes |
-| `LANGSMITH_TRACING` | Enable LangSmith tracing | No |
-| `LANGSMITH_ENDPOINT` | LangSmith API endpoint | No |
-| `LANGSMITH_API_KEY` | LangSmith API key | No |
-| `LANGSMITH_PROJECT` | LangSmith project name | No |
-| `NODE_ENV` | Environment (production/development) | No |
+| `CORS_ORIGIN` | CORS allowed origins | No |
+| `CACHE_TTL` | Trade history cache TTL (ms) | No |
+| `WAR_CYCLE_TIMEOUT_MS` | Delay between trading cycles | No |
+| `ANTHROPIC_API_KEY` | Anthropic API key | No* |
+| `GOOGLE_API_KEY` | Google API key | No* |
+| `OPENAI_API_KEY` | OpenAI API key | No* |
+
+*At least one AI provider API key is required
+
+## Security
+
+- Never commit `.env` or `config/extended-war.config.json`
+- Use strong API secrets in production (generate with: `openssl rand -hex 32`)
+- Store private keys securely
+- Review trading strategies before deploying to production
+- This is a showcase project - use with caution in production
 
 ## Troubleshooting
 
+### ask-starknet Connection Issues
+
+Ensure ask-starknet is properly set up and the path is correct:
+
+```typescript
+// Check war.manager.ts
+// Default path: '../ask-starknet/packages/mcp/build/index.js'
+```
+
 ### Port Already in Use
 
-If port 5004 is already in use:
-
 ```bash
-# Find the process
-lsof -i :5004
-
-# Kill it
+# Find and kill process
+lsof -i :5050
 kill -9 <PID>
 
-# Or change the port in docker-compose.yml or when running
-PORT=5004 pnpm run dev
+# Or use different port
+PORT=5051 pnpm run dev
 ```
 
 ### Docker Build Fails
 
-If Docker build fails with TypeScript errors:
-
 ```bash
-# Clean and rebuild locally first
+# Clean and rebuild
 pnpm run clean
 pnpm install
 pnpm run build
-
-# Then try Docker build again
 docker build -t extended-war:latest .
 ```
 
-### MCP Server Connection Issues
+## Learn More
 
-Ensure the `ask-starknet` MCP server is available:
-
-```bash
-# Check the path in war.manager.ts line 101
-# Default: '../ask-starknet/packages/mcp/build/index.js'
-# Update to match your local setup
-```
-
-## Security
-
-- **Never commit** `.env` or `config/extended-war.config.json` files
-- Store API keys securely
-- Use environment variables for sensitive data
-- Review all trading decisions before deploying to production
+- [ask-starknet Documentation](https://github.com/KasarLabs/ask-starknet)
+- [Extended Exchange (X10)](https://x10.exchange/)
+- [Starknet Documentation](https://docs.starknet.io/)
+- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
+- [Model Context Protocol](https://modelcontextprotocol.io/)
 
 ## License
 
 MIT
-
-## Support
-
-For issues and questions:
-- GitHub Issues: [Create an issue](https://github.com/your-org/extended-war/issues)
-- Discord: [Join our community](#)
 
 ## Contributing
 
@@ -429,10 +336,14 @@ Contributions are welcome! Please:
 
 1. Fork the repository
 2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+3. Make your changes
+4. Submit a Pull Request
+
+## Support
+
+- Issues: [GitHub Issues](https://github.com/KasarLabs/extended-war/issues)
+- ask-starknet: [GitHub Issues](https://github.com/KasarLabs/ask-starknet/issues)
 
 ---
 
-**Built with** ❤️ **using TypeScript, LangChain, and Starknet**
+**Built with** ❤️ **by [Kasar Labs](https://kasar.io) to showcase the power of [ask-starknet](https://github.com/KasarLabs/ask-starknet)**

@@ -58,15 +58,14 @@ export class ExtendedWarManager {
     try {
       for (const account of this.config.accounts) {
         const transport = new StdioClientTransport({
-          command: 'node',
-          args: ['../ask-starknet/packages/mcp/build/index.js'],
+          command: 'npx',
+          args: ['-y', '@kasarlabs/ask-starknet-mcp'],
           env: {
             STARKNET_RPC_URL: process.env.STARKNET_RPC_URL as string,
             ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY as string,
             EXTENDED_API_URL: account.extended.apiUrl,
             EXTENDED_API_KEY: account.extended.apiKey,
             EXTENDED_PRIVATE_KEY: account.extended.privateKey,
-            NODE_ENV: 'local',
           },
         });
         account.mcpClient.connect(transport);

@@ -8,7 +8,12 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:5004",
+      "value": "http://localhost:5050",
+      "type": "string"
+    },
+    {
+      "key": "api_secret",
+      "value": "your_secure_api_secret_here",
       "type": "string"
     }
   ],
@@ -23,7 +28,7 @@
           "host": ["{{base_url}}"],
           "path": ["health"]
         },
-        "description": "Check if the service is running and healthy"
+        "description": "Check if the service is running and healthy. No authentication required."
       },
       "response": [
         {
@@ -46,41 +51,32 @@
               "value": "application/json"
             }
           ],
-          "body": "{\n  \"success\": true,\n  \"message\": \"Service is healthy\",\n  \"data\": {\n    \"status\": \"ok\",\n    \"uptime\": 123.456,\n    \"timestamp\": \"2025-11-07T14:30:00.000Z\"\n  }\n}"
+          "body": "{\n  \"success\": true,\n  \"message\": \"Service is healthy\",\n  \"data\": {\n    \"status\": \"ok\",\n    \"uptime\": 123.456,\n    \"timestamp\": \"2025-11-17T14:30:00.000Z\"\n  }\n}"
         }
       ]
     },
     {
-      "name": "Start War",
+      "name": "Check War Running Status",
       "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": ""
-        },
+        "method": "GET",
+        "header": [],
         "url": {
-          "raw": "{{base_url}}/start-war",
+          "raw": "{{base_url}}/is-war-running",
           "host": ["{{base_url}}"],
-          "path": ["start-war"]
+          "path": ["is-war-running"]
         },
-        "description": "Initialize and start the trading bot. The bot will run in the background."
+        "description": "Check if the war is currently running. No authentication required."
       },
       "response": [
         {
           "name": "Success",
           "originalRequest": {
-            "method": "POST",
+            "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/start-war",
+              "raw": "{{base_url}}/is-war-running",
               "host": ["{{base_url}}"],
-              "path": ["start-war"]
+              "path": ["is-war-running"]
             }
           },
           "status": "OK",
@@ -92,17 +88,102 @@
               "value": "application/json"
             }
           ],
-          "body": "{\n  \"success\": true,\n  \"message\": \"War started successfully\",\n  \"data\": {\n    \"status\": \"started\",\n    \"startedAt\": \"2025-11-07T14:30:00.000Z\"\n  }\n}"
+          "body": "{\n  \"success\": true,\n  \"message\": \"War running status retrieved successfully\",\n  \"data\": {\n    \"isRunning\": false,\n    \"timestamp\": \"2025-11-17T14:30:00.000Z\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Start War",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-Secret",
+            "value": "{{api_secret}}",
+            "type": "string"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{base_url}}/api/start-war",
+          "host": ["{{base_url}}"],
+          "path": ["api", "start-war"]
+        },
+        "description": "Initialize and start the trading bot. The bot will run in the background. Requires API secret authentication."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Secret",
+                "value": "{{api_secret}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/start-war",
+              "host": ["{{base_url}}"],
+              "path": ["api", "start-war"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"message\": \"War started successfully\",\n  \"data\": {\n    \"status\": \"started\",\n    \"startedAt\": \"2025-11-17T14:30:00.000Z\"\n  }\n}"
+        },
+        {
+          "name": "Unauthorized",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/start-war",
+              "host": ["{{base_url}}"],
+              "path": ["api", "start-war"]
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Unauthorized\",\n  \"error\": {\n    \"code\": \"UNAUTHORIZED\",\n    \"message\": \"Invalid or missing API secret\"\n  }\n}"
         },
         {
           "name": "Error",
           "originalRequest": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Secret",
+                "value": "{{api_secret}}",
+                "type": "string"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/start-war",
+              "raw": "{{base_url}}/api/start-war",
               "host": ["{{base_url}}"],
-              "path": ["start-war"]
+              "path": ["api", "start-war"]
             }
           },
           "status": "Internal Server Error",
@@ -126,6 +207,11 @@
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "X-API-Secret",
+            "value": "{{api_secret}}",
+            "type": "string"
           }
         ],
         "body": {
@@ -133,22 +219,28 @@
           "raw": ""
         },
         "url": {
-          "raw": "{{base_url}}/end-war",
+          "raw": "{{base_url}}/api/end-war",
           "host": ["{{base_url}}"],
-          "path": ["end-war"]
+          "path": ["api", "end-war"]
         },
-        "description": "Stop the trading bot execution"
+        "description": "Stop the trading bot execution. Requires API secret authentication."
       },
       "response": [
         {
           "name": "Success",
           "originalRequest": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Secret",
+                "value": "{{api_secret}}",
+                "type": "string"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/end-war",
+              "raw": "{{base_url}}/api/end-war",
               "host": ["{{base_url}}"],
-              "path": ["end-war"]
+              "path": ["api", "end-war"]
             }
           },
           "status": "OK",
@@ -160,17 +252,45 @@
               "value": "application/json"
             }
           ],
-          "body": "{\n  \"success\": true,\n  \"message\": \"War stopped successfully\",\n  \"data\": {\n    \"status\": \"stopped\",\n    \"stoppedAt\": \"2025-11-07T14:35:00.000Z\"\n  }\n}"
+          "body": "{\n  \"success\": true,\n  \"message\": \"War stopped successfully\",\n  \"data\": {\n    \"status\": \"stopped\",\n    \"stoppedAt\": \"2025-11-17T14:35:00.000Z\"\n  }\n}"
+        },
+        {
+          "name": "Unauthorized",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/end-war",
+              "host": ["{{base_url}}"],
+              "path": ["api", "end-war"]
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Unauthorized\",\n  \"error\": {\n    \"code\": \"UNAUTHORIZED\",\n    \"message\": \"Invalid or missing API secret\"\n  }\n}"
         },
         {
           "name": "Error",
           "originalRequest": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Secret",
+                "value": "{{api_secret}}",
+                "type": "string"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/end-war",
+              "raw": "{{base_url}}/api/end-war",
               "host": ["{{base_url}}"],
-              "path": ["end-war"]
+              "path": ["api", "end-war"]
             }
           },
           "status": "Internal Server Error",
@@ -190,24 +310,36 @@
       "name": "Get Trade History",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "X-API-Secret",
+            "value": "{{api_secret}}",
+            "type": "string"
+          }
+        ],
         "url": {
-          "raw": "{{base_url}}/trade-history",
+          "raw": "{{base_url}}/api/trade-history",
           "host": ["{{base_url}}"],
-          "path": ["trade-history"]
+          "path": ["api", "trade-history"]
         },
-        "description": "Retrieve trading history for all configured accounts"
+        "description": "Retrieve trading history for all configured accounts. Requires API secret authentication. Results are cached for 60 seconds by default."
       },
       "response": [
         {
           "name": "Success",
           "originalRequest": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Secret",
+                "value": "{{api_secret}}",
+                "type": "string"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/trade-history",
+              "raw": "{{base_url}}/api/trade-history",
               "host": ["{{base_url}}"],
-              "path": ["trade-history"]
+              "path": ["api", "trade-history"]
             }
           },
           "status": "OK",
@@ -219,17 +351,101 @@
               "value": "application/json"
             }
           ],
-          "body": "{\n  \"success\": true,\n  \"message\": \"Trade history retrieved successfully\",\n  \"data\": {\n    \"accounts\": [\n      {\n        \"account\": {\n          \"name\": \"Account 1\",\n          \"model\": {},\n          \"extended\": {}\n        },\n        \"balance\": {},\n        \"openOrders\": [],\n        \"positions\": [],\n        \"trade\": []\n      }\n    ],\n    \"timestamp\": \"2025-11-07T14:30:00.000Z\"\n  }\n}"
+          "body": "{\n  \"success\": true,\n  \"message\": \"Trade history retrieved successfully\",\n  \"data\": {\n    \"accounts\": [\n      {\n        \"account\": {\n          \"name\": \"Account 1\",\n          \"extended\": {}\n        },\n        \"balance\": {},\n        \"openOrders\": [],\n        \"positions\": [],\n        \"trade\": []\n      }\n    ],\n    \"startPrice\": 100.00,\n    \"timestamp\": \"2025-11-17T14:30:00.000Z\"\n  }\n}"
+        },
+        {
+          "name": "Success (Cached)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Secret",
+                "value": "{{api_secret}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/trade-history",
+              "host": ["{{base_url}}"],
+              "path": ["api", "trade-history"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Trade history retrieved successfully (cached)\",\n  \"data\": {\n    \"accounts\": [\n      {\n        \"account\": {\n          \"name\": \"Account 1\",\n          \"extended\": {}\n        },\n        \"balance\": {},\n        \"openOrders\": [],\n        \"positions\": [],\n        \"trade\": []\n      }\n    ],\n    \"startPrice\": 100.00,\n    \"timestamp\": \"2025-11-17T14:30:00.000Z\"\n  }\n}"
+        },
+        {
+          "name": "Unauthorized",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/trade-history",
+              "host": ["{{base_url}}"],
+              "path": ["api", "trade-history"]
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Unauthorized\",\n  \"error\": {\n    \"code\": \"UNAUTHORIZED\",\n    \"message\": \"Invalid or missing API secret\"\n  }\n}"
+        },
+        {
+          "name": "Rate Limited",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Secret",
+                "value": "{{api_secret}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/trade-history",
+              "host": ["{{base_url}}"],
+              "path": ["api", "trade-history"]
+            }
+          },
+          "status": "Too Many Requests",
+          "code": 429,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Too many requests for trade history, please try again in a moment.\"\n}"
         },
         {
           "name": "Error",
           "originalRequest": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Secret",
+                "value": "{{api_secret}}",
+                "type": "string"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/trade-history",
+              "raw": "{{base_url}}/api/trade-history",
               "host": ["{{base_url}}"],
-              "path": ["trade-history"]
+              "path": ["api", "trade-history"]
             }
           },
           "status": "Internal Server Error",

@@ -40,6 +40,8 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
     "express": "4.21.2",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
     "json-custom-numbers": "^3.1.1",
     "langchain": "^1.0.2",
     "lodash-es": "^4.17.21",
