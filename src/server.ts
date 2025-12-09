@@ -13,7 +13,6 @@ import type {
   WarRunningStatusResponseData,
 } from './types/api.types.js';
 import rateLimit from 'express-rate-limit';
-import type { HistoryTradeAccount } from './war/war.types.js';
 import helmet from 'helmet';
 import { authRateLimiter, validateSecret } from './middleware/app.middleware.js';
 
@@ -65,9 +64,14 @@ export const createServer = (): Express => {
     .use(json({ limit: '1mb' }))
     .use(
       cors({
-        origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        origin:
+          process.env.CORS_ORIGIN === '*'
+            ? '*'
+            : process.env.CORS_ORIGIN
+              ? process.env.CORS_ORIGIN.split(',')
+              : '*',
+        credentials: process.env.CORS_ORIGIN === '*' ? false : true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-API-Secret'],
       })
     )
@@ -98,7 +102,7 @@ export const createServer = (): Express => {
     )
     .use('/api', authRateLimiter, validateSecret)
     .post(
-      '/api//start-war',
+      '/api/start-war',
       async (_req: Request, res: Response<ApiResponse<StartWarResponseData>>) => {
         try {
           await war.init();
@@ -183,8 +187,8 @@ export const createServer = (): Express => {
             },
             balance: item.balance,
             openOrders: item.openOrders,
-            positions: item.positions,
-            trade: item.trade,
+            open_positions: item.open_positions,
+            positions_history: item.positions_history,
           }));
 
           const responseData: TradeHistoryResponseData = {

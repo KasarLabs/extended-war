@@ -26,8 +26,8 @@ export interface HistoryTradeAccount {
   account: AccountConfigWithModel;
   balance: Balance;
   openOrders: OrderReturn[];
-  positions: Position[];
-  trade: Trade[];
+  open_positions: Position[];
+  positions_history: Position[];
 }
 
 /**

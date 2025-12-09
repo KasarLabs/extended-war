@@ -1,5 +1,6 @@
 // Configuration
 const API_BASE_URL = 'http://localhost:5004';
+const API_SECRET = '40bab1e52b08e8bac3063128a849382892016cf48cca9c420f42d9f8a07a73db';
 const REFRESH_INTERVAL = 5000; // 5 seconds
 const START_PRICE = 20; // Will be updated from API
 
@@ -50,12 +51,19 @@ function formatCurrency(num) {
 // API Functions
 async function fetchAPI(endpoint, options = {}) {
     try {
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        };
+
+        // Add API secret for protected routes (those starting with /api/)
+        if (endpoint.startsWith('/api/')) {
+            headers['X-API-Secret'] = API_SECRET;
+        }
+
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
+            headers,
         });
 
         const data = await response.json();
@@ -85,7 +93,7 @@ async function checkWarStatus() {
 async function startWar() {
     try {
         startWarBtn.disabled = true;
-        const data = await fetchAPI('/start-war', { method: 'POST' });
+        const data = await fetchAPI('/api/start-war', { method: 'POST' });
         showNotification(data.message, 'success');
         await checkWarStatus();
         startAutoRefresh();
@@ -99,7 +107,7 @@ async function startWar() {
 async function stopWar() {
     try {
         stopWarBtn.disabled = true;
-        const data = await fetchAPI('/end-war', { method: 'POST' });
+        const data = await fetchAPI('/api/end-war', { method: 'POST' });
         showNotification(data.message, 'success');
         await checkWarStatus();
         stopAutoRefresh();
@@ -112,7 +120,7 @@ async function stopWar() {
 
 async function fetchTradeHistory() {
     try {
-        const data = await fetchAPI('/trade-history');
+        const data = await fetchAPI('/api/trade-history');
         return {
             accounts: data.data.accounts,
             startPrice: data.data.startPrice || START_PRICE

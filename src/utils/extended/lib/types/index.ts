@@ -46,20 +46,26 @@ export interface Position {
   side: 'LONG' | 'SHORT';
   leverage: string;
   size: string;
-  value: string;
+  value?: string;
   openPrice: string;
-  markPrice: string;
-  liquidationPrice: string;
-  margin: string;
-  unrealisedPnl: string;
+  markPrice?: string;
+  liquidationPrice?: string;
+  margin?: string;
+  unrealisedPnl?: string;
   realisedPnl: string;
   tpTriggerPrice?: string;
   tpLimitPrice?: string;
   slTriggerPrice?: string;
   slLimitPrice?: string;
-  adl: number;
-  createdAt: number;
-  updatedAt: number;
+  adl?: number;
+  createdAt?: number;
+  updatedAt?: number;
+  // Fields for closed positions
+  exitType?: 'TRADE' | 'LIQUIDATION' | 'DELEVERAGE';
+  maxPositionSize?: string;
+  exitPrice?: string;
+  createdTime?: number;
+  closedTime?: number;
 }
 
 // Order types

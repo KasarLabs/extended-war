@@ -9,7 +9,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { loadConfig, type Config, type ConfigWithModel } from '../utils/config-loader.js';
 import { initializeModels } from '../utils/model.utils.js';
-import { getTradesHistory } from '../utils/extended/tools/read/getTradesHistory.js';
+import { getPositionsHistory } from '../utils/extended/tools/read/getPositionsHistory.js';
 import type { HistoryTradeAccount } from './war.types.js';
 export { tokenSupported, START_PRICE } from './war.types.js';
 
@@ -145,7 +145,7 @@ export class ExtendedWarManager {
   }
 
   public async getTradesHistory(): Promise<HistoryTradeAccount[]> {
-    const tradeHistory: HistoryTradeAccount[] = [];
+    const positionHistory: HistoryTradeAccount[] = [];
     for (const account of this.config.accounts) {
       const accountBalance = await getBalance(
         {
@@ -171,7 +171,7 @@ export class ExtendedWarManager {
         },
         {}
       );
-      const trade = await getTradesHistory(
+      const trade = await getPositionsHistory(
         {
           apiUrl: account.extended.apiUrl as string,
           apiKey: account.extended.apiKey as string,
@@ -186,15 +186,15 @@ export class ExtendedWarManager {
         );
         continue;
       }
-      tradeHistory.push({
+      positionHistory.push({
         account,
         balance: accountBalance.data as Balance,
         openOrders: openOrders.data as OrderReturn[],
-        positions: positions.data as Position[],
-        trade: trade.data as Trade[],
+        open_positions: positions.data as Position[],
+        positions_history: trade.data as Position[],
       });
     }
-    return tradeHistory;
+    return positionHistory;
   }
   public isRunning(): boolean {
     return this.running;
